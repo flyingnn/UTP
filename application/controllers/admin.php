@@ -33,8 +33,8 @@ class Admin extends CI_Controller {
 	 */
 	public function logout()
 	{
-        $this->input->set_cookie('user_email','',0);
-        $this->input->set_cookie('user_password','',0);
+                $this->input->set_cookie('user_email','',0);
+                $this->input->set_cookie('user_password','',0);
 		//跳转
 		Header("HTTP/1.1 303 See Other");
 		Header("Location: ".site_url('login'));
@@ -46,20 +46,21 @@ class Admin extends CI_Controller {
 	 *
 	 */
 	public function search(){
-        $this->load->model('M_taobaoapi');
-        $data['cat'] = $this->M_cat->get_all_cat();
+                $this->load->model('M_taobaoapi');
+                $data['cat'] = $this->M_cat->get_all_cat();
 
-         //获取搜索关键词
-        $keyword = $_GET['keyword'];
+                 //获取搜索关键词
+                $keyword = $this->input->get('keyword');
 
-        /* cid是类别id */
-        $cid = '0';
-        if(!empty($_GET['cat_select'])){
-            $cid = $_GET['cat_select'];
-        }
+                /* cid是类别id */
+                $cid = '0';
+                //if(!empty($this->input->get('cat_select'))){
+                if($this->input->get('cat_select')){
+                    $cid = intval($this->input->get('cat_select'));
+                }
 
-        $data['resp'] = $this->M_taobaoapi->searchItem($keyword, $cid);
-        $data['keyword'] =  $_GET['keyword'];
+                $data['resp'] = $this->M_taobaoapi->searchItem($keyword, $cid);
+                $data['keyword'] =  $this->input->get('keyword');
 
 		$this->load->view('admin/include_header');
 		$this->load->view('admin/search_view',$data);
@@ -110,20 +111,20 @@ class Admin extends CI_Controller {
 
 		//如果是按店铺查看
 		else if($stattype == 'shops'){
-         	$data['query'] = $this->M_item->query_shops();
-            $data['click_count_sum'] = $this->M_cat->click_count_by_cid();
-            $data['item_count_sum'] = $this->M_item->count_items();
-			$this->load->view('admin/include_header');
-			$this->load->view('admin/status/shops_view',$data);
+                        $data['query'] = $this->M_item->query_shops();
+                        $data['click_count_sum'] = $this->M_cat->click_count_by_cid();
+                        $data['item_count_sum'] = $this->M_item->count_items();
+                        $this->load->view('admin/include_header');
+                        $this->load->view('admin/status/shops_view',$data);
 		}
 
 		//如果是按类别查看
 		else if($stattype == 'cats'){
-			$data['query'] = $this->M_cat->query_cats();
-			$data['click_count_sum'] = $this->M_cat->click_count_by_cid();
-            $data['item_count_sum'] = $this->M_item->count_items();
-            $this->load->view('admin/include_header');
-			$this->load->view('admin/status/cats_view',$data);
+                        $data['query'] = $this->M_cat->query_cats();
+                        $data['click_count_sum'] = $this->M_cat->click_count_by_cid();
+                        $data['item_count_sum'] = $this->M_item->count_items();
+                        $this->load->view('admin/include_header');
+                        $this->load->view('admin/status/cats_view',$data);
 		}
 	}
 
@@ -144,8 +145,8 @@ class Admin extends CI_Controller {
      * @param string $parentid 可选的参数
      */
 	public function catadd($parentid = '0'){
-        $this->load->model('M_taobaoapi');
-        $data['resp'] = $this->M_taobaoapi->getCats($parentid);
+                $this->load->model('M_taobaoapi');
+                $data['resp'] = $this->M_taobaoapi->getCats($parentid);
 		$this->load->view('admin/include_header');
 		$this->load->view('admin/catadd_view',$data);
 	}
@@ -153,18 +154,18 @@ class Admin extends CI_Controller {
 	public function catupdate_op(){
 		$this->M_cat->update_cat();
 		$data['cat_saved'] = true;
-        $data['cat'] = $this->M_cat->get_all_cat();
-        $this->load->view('admin/include_header');
-        $this->load->view('admin/cat_view',$data);
+                $data['cat'] = $this->M_cat->get_all_cat();
+                $this->load->view('admin/include_header');
+                $this->load->view('admin/cat_view',$data);
 	}
 
 
 	public function catadd_op(){
-        $this->M_cat->add_cat();
-        $data['cat'] = $this->M_cat->get_all_cat();
+                $this->M_cat->add_cat();
+                $data['cat'] = $this->M_cat->get_all_cat();
 		$data['cat_saved'] = false;
-        $this->load->view('admin/include_header');
-        $this->load->view('admin/cat_view',$data);
+                $this->load->view('admin/include_header');
+                $this->load->view('admin/cat_view',$data);
 	}
 
 	/**
@@ -180,28 +181,28 @@ class Admin extends CI_Controller {
      * @return string $resp json字符串，包含所有的相关图片
      */
 	public function getiteminfo(){
-        $this->load->model('M_taobaoapi');
-        $item_id = $_GET['item_id'];
-        $resp = $this->M_taobaoapi->getiteminfo($item_id);
+                $this->load->model('M_taobaoapi');
+                $item_id = $this->input->get('item_id');
+                $resp = $this->M_taobaoapi->getiteminfo($item_id);
 
-        $img_url_array =array();
+                $img_url_array =array();
 
-        if($resp->item->item_imgs){
-            foreach($resp->item->item_imgs->item_img as $item_img){
-                array_push($img_url_array,(string)$item_img->url);
-            }
-        }
+                if($resp->item->item_imgs){
+                    foreach($resp->item->item_imgs->item_img as $item_img){
+                        array_push($img_url_array,(string)$item_img->url);
+                    }
+                }
 
-        if($resp->item->prop_imgs){
-            foreach($resp->item->prop_imgs->prop_img as $prop_img){
-                array_push($img_url_array,(string)$prop_img->url);
-            }
-        }
+                if($resp->item->prop_imgs){
+                    foreach($resp->item->prop_imgs->prop_img as $prop_img){
+                        array_push($img_url_array,(string)$prop_img->url);
+                    }
+                }
 
-        $item_info_array = array();
-        $item_info_array['imgs'] = $img_url_array;
+                $item_info_array = array();
+                $item_info_array['imgs'] = $img_url_array;
 
-        echo json_encode($item_info_array);
+                echo json_encode($item_info_array);
 
 	}
 
@@ -219,17 +220,17 @@ class Admin extends CI_Controller {
 	 * 抓取远程图片，保存到本地，尺寸为230px
 	 */
 	public function saveimage(){
-        $image_source_url = $_POST['img_source_url'];
-      	$image_new_name = $_POST['img_new_name'];
-        try{
-		 $this->M_item->save_image($image_source_url,$image_new_name);
-        }
-        catch(Exception $e)
-          {
-               //输出500错误表示保存图片失败
-              header('HTTP/1.1 500 '.$e->getMessage());
-	          die();
-          }
+                $image_source_url = $this->input->post('img_source_url');
+                $image_new_name = $this->input->post('img_new_name');
+                try{
+                         $this->M_item->save_image($image_source_url,$image_new_name);
+                }
+                catch(Exception $e)
+                {
+                       //输出500错误表示保存图片失败
+                      header('HTTP/1.1 500 '.$e->getMessage());
+                          die();
+                }
 	}
 
     /**

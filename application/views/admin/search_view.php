@@ -25,6 +25,7 @@
 
 <?php
 
+//var_dump($resp);
 //打印XML中的条目信息
 puPrintItem($resp);
 
@@ -32,11 +33,18 @@ function puPrintItem($resp){
 	echo "<ul id='search-list'>";
 		if($resp->total_results == 0){
 			echo '没有找到条目，请修改关键词或者类别。';
-		} else{
+		} else{ //var_dump($resp);
 			foreach($resp->taobaoke_items->taobaoke_item as $taobaoke_item){
 			?>
 				<li>
-					<a href='<?php echo $taobaoke_item->click_url ?>' data-taobaoke_id='<?php echo $taobaoke_item->num_iid ?>' title='<?php echo strip_tags($taobaoke_item->title)?>' data-price='<?php echo $taobaoke_item->price?>' data-commission='<?php echo $taobaoke_item->commission ?>' data-sellernick='<?php echo $taobaoke_item->nick; ?>'>
+					<a href='<?php echo $taobaoke_item->click_url ?>' data-taobaoke_id='<?php echo $taobaoke_item->num_iid ?>' 
+                                                title='<?php echo strip_tags($taobaoke_item->title)?>' 
+                                                data-price='<?php echo $taobaoke_item->price?>' 
+                                                data-commission='<?php echo $taobaoke_item->commission ?>' 
+                                                data-seller_credit_score='<?php echo $taobaoke_item->seller_credit_score ?>' 
+                                                data-item_location='<?php echo $taobaoke_item->item_location ?>' 
+                                                data-shop_type='<?php echo $taobaoke_item->coupon_rate  ?>' 
+                                                data-sellernick='<?php echo $taobaoke_item->nick; ?>'>
 					<img src="<?php echo $taobaoke_item->pic_url?>" alt="<?php echo $taobaoke_item->title?>"/>
 					</a>
 					<p><span class="right"><?php echo $taobaoke_item->volume ?>件/30天</span><span><?php echo $taobaoke_item->commission ?></span> / <span><?php echo $taobaoke_item->price?></span></p>
@@ -67,7 +75,7 @@ function puPrintItem($resp){
 <script type='text/javascript' src='<?php echo base_url()?>assets/js/bootstrap-modal.js'></script>
 <script type="text/javascript">
 (function($) {
-	var global_clickurl,global_title,global_price,global_nick,global_cid;
+	var global_clickurl,global_title,global_price,global_nick,global_cid,global_credit,global_location,global_type;
 	//搜索结果中的条目点击
 	$('#search-list li a').click(
 			function(event){
@@ -81,6 +89,9 @@ function puPrintItem($resp){
 				global_sellernick = $(this).data('sellernick');
 				global_commission = $(this).data('commission');
 				global_itemid = $(this).data('taobaoke_id');
+                                global_credit = $(this).data('seller_credit_score');
+                                global_location = $(this).data('item_location');
+                                global_type = $(this).data('shop_type');
 
 				$('#pop-pictures').modal();
 
@@ -131,7 +142,12 @@ function puPrintItem($resp){
 							cid: $item.cid,
 							sellernick: $item.sellernick,
 							click_url: $item.click_url,
-							price: $item.price
+							price: $item.price,
+                                                        iid: global_itemid,
+                                                        credit: global_credit,
+                                                        item_location: global_location,
+                                                        shop_type: global_type
+                                                        
 						   },
 						   function(data) {
 							 $('#pop-pictures .modal-body').html('成功！');
@@ -152,8 +168,8 @@ function puPrintItem($resp){
 	  return $('<div/>').html(value).text();
 	}
 
-	<?php if(!empty($_GET['cat_select'])){
-		$cid = $_GET['cat_select'];
+	<?php if($this->input->get('cat_select')){
+		$cid = intval($this->input->get('cat_select'));
 	}else {
 	$cid = 0;
 }

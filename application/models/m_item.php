@@ -16,20 +16,27 @@ class M_item extends CI_Model{
 	//通过POST传递过来的参数，可以存入到数据库中，然后返回一个“添加成功！”
 	function set_item(){
 		$data = array(
-               'title' => $_POST['title'],
-               'img_url' => $_POST['img_url'],
-               'cid' => $_POST['cid'],
-               'click_url' =>  $_POST['click_url'],
-               'price' => $_POST['price'],
-               'sellernick' => $_POST['sellernick']
+               'title' => $this->input->post('title'),
+               'img_url' => $this->input->post('img_url'),
+               'cid' => $this->input->post('cid'),
+               'click_url' =>  str_replace('+','%2B',$this->input->post('click_url')),
+               'price' => $this->input->post('price'),
+               'sellernick' => $this->input->post('sellernick'),
+               'num_iid' => $this->input->post('iid'),
+               'seller_credit' => $this->input->post('credit'),
+               'shop_type' => $this->input->post('shop_type'),
+               'item_location' => $this->input->post('item_location'),
+               'uuid' => substr(md5(time()),0,5).substr(md5(uniqid()),0,10)
             );
-
-	$this->db->insert('item', $data);
+                if ($this->M_item->itemExist($this->input->post('iid')))
+                        $this->db->update('item', $data,"num_iid = ".$this->input->post('iid'));
+                else
+                        $this->db->insert('item', $data);
 	}
 
 	function delete_item(){
 		$data = array(
-               'id' => $_POST['item_id']
+               'id' => $this->input->post('item_id')
             );
 		$this->db->delete('item', $data);
 		echo '1';
@@ -40,23 +47,36 @@ class M_item extends CI_Model{
 	   */
 	function get_item_clickurl($item_id){
 		$this->db->select('click_url');
-		$data = array(
-               'id' => $item_id
-            );
+                if (strlen($item_id) > 10)
+                {
+                        $data = array(
+                                'uuid' => "$item_id"
+                        );
+                }
+                else
+                {
+                        $data = array(
+                                'id' => $item_id
+                        ); 
+                }
 		$query = $this->db->get_where('item', $data);
 		if($query->num_rows()>0){
 			foreach($query->result() as $array){
 				$return_clickurl = $array->click_url;
 				return $return_clickurl;
 			}
-		}else return 0;
+		}
+                else return 0;
 	}
 
 	/*
 	 * 增加条目click_count
 	 *  */
-	function add_click_count($item_id)	{
-		$sql_query = "UPDATE ".$this->item_table." SET click_count = click_count+1 WHERE id =".$item_id;
+	function add_click_count($item_id){
+                if (strlen($item_id) > 10)
+                        $sql_query = "UPDATE ".$this->item_table." SET click_count = click_count+1 WHERE uuid ='".$item_id."'";
+                else
+                        $sql_query = "UPDATE ".$this->item_table." SET click_count = click_count+1 WHERE id =".$item_id;
 		$this->db->query($sql_query);
 		return $item_id;
 	}
@@ -70,7 +90,7 @@ class M_item extends CI_Model{
 		$this->db->limit($limit,$offset);
 		//如果是分类页
 		if(!empty($cat)){
-			$sql = "SELECT click_count,id,title,click_url,img_url,price,sellernick FROM ".$this->item_table.",".$this->cat_table." WHERE ".$this->item_table.".cid=".$this->cat_table.".cat_id AND ".$this->cat_table.".cat_slug='".$cat."' ORDER BY id DESC LIMIT ".$offset.", ".($offset+$limit);
+			$sql = "SELECT * FROM ".$this->item_table.",".$this->cat_table." WHERE ".$this->item_table.".cid=".$this->cat_table.".cat_id AND ".$this->cat_table.".cat_slug='".$cat."' ORDER BY id DESC LIMIT ".$offset.", ".($offset+$limit);
 			$query=$this->db->query($sql);
 			}
 		//如果是主页
@@ -173,7 +193,7 @@ class M_item extends CI_Model{
      */
     function itemExist($item_id){
         $data = array(
-                      'id' => $item_id
+                      'num_iid' => $item_id
                    );
                $query = $this->db->get_where('item', $data);
         if($query->num_rows() > 0){

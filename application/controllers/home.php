@@ -36,8 +36,8 @@ class Home extends CI_Controller {
 
 		$config['total_rows'] = $this->M_item->count_items();
 		//这是模型里面的方法，获得总数。
-        $config['use_page_numbers'] = TRUE;
-        $config['first_url'] = site_url('/home');
+                $config['use_page_numbers'] = TRUE;
+                $config['first_url'] = site_url('/home');
 		$config['per_page'] = $limit;
 		$config['first_link'] = '首页';
 		$config['last_link'] = '尾页';
@@ -70,14 +70,14 @@ class Home extends CI_Controller {
 	 */
 	function redirect($item_id){
 
-        $this->load->library('user_agent');
-        if(!$this->agent->is_robot()){
-            $this->M_item->add_click_count($item_id);
-        }
+                $this->load->library('user_agent');
+                if(!$this->agent->is_robot()){
+                    $this->M_item->add_click_count($item_id);
+                }
 
-		Header("HTTP/1.1 303 See Other");
-		Header("Location: ".$this->M_item->get_item_clickurl($item_id));
-		exit;
+                Header("HTTP/1.1 303 See Other");
+                Header("Location: ".$this->M_item->get_item_clickurl($item_id));
+                exit;
 	}
 
 

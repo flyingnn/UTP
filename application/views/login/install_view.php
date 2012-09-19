@@ -11,9 +11,9 @@
 
 <?php
 //验证登录用户名和密码
-if(!empty($_POST['user_email'])){
-	$user_email = $_POST['user_email'];
-	$user_password = md5($_POST['user_password']);
+if($this->input->post('user_email')){
+	$user_email = $this->input->post('user_email');
+	$user_password = md5($this->input->post('user_password'));
 
 	$query = $this->db->insert('admin', array('user_email' => $user_email,'user_password' => $user_password));
 

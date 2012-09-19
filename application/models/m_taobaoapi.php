@@ -32,7 +32,7 @@ class M_taobaoapi extends CI_Model{
     	$c->secretKey = SECRETKEY;
 
     	$req = new TaobaokeItemsGetRequest;
-    	$req->setFields("num_iid,title,click_url,pic_url,price,commission,commission_num,volume,nick");
+    	$req->setFields("num_iid,title,click_url,pic_url,price,commission,commission_num,volume,nick,seller_credit_score,item_location");
     	$req->setPid(PID);
 
     	$req->setCid($cid);
@@ -43,8 +43,8 @@ class M_taobaoapi extends CI_Model{
     	$req->setStartCommissionRate("500");
     	$req->setEndCommissionRate("5000");
     	$req->setMallItem("true");
-    	$req->setPageNo(1);
-    	$req->setPageSize(80);
+    	$req->setPageNo(3);
+    	$req->setPageSize(30);
     	$req->setOuterCode("abc");
     	//执行API请求并打印结果
     	$resp = $c->execute($req);
@@ -66,6 +66,7 @@ class M_taobaoapi extends CI_Model{
         //item_imgs->item_img->url 所有的大图
         //desc 好像很厉害的样子
         $req->setFields("prop_img.url,item_img.url,nick");
+        //      num_iid,title,nick,pic_url,price,click_url,commission,commission_rate,commission_num,commission_volume,shop_click_url,seller_credit_score,item_location,volume
         //	$req->setFields("detail_url,num_iid,title,nick,type,cid,seller_cids,props,input_pids,input_str,desc,pic_url,num,valid_thru,list_time,delist_time,stuff_status,location,price,post_fee,express_fee,ems_fee,has_discount,freight_payer,has_invoice,has_warranty,has_showcase,modified,increment,approve_status,postage_id,product_id,auction_point,property_alias,item_img,prop_img,sku,video,outer_id,is_virtual");
         $req->setNumIid($item_id);
         $resp = $c->execute($req);

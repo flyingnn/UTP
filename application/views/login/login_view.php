@@ -12,11 +12,11 @@
 
 <?php
 //验证登录用户名和密码
-if(isset($_POST['user_email']) && isset($_POST['user_password'])){
-	$user_email = $_POST['user_email'];
-	$user_password = md5($_POST['user_password']);
+if($this->input->post('user_email') && $this->input->post('user_password')){
+	$user_email = $this->input->post('user_email');
+	$user_password = md5($this->input->post('user_password'));
 
-	$query = $this->db->get_where('admin', array('user_email' => $user_email,'user_password' => $user_password));
+	$query = $this->db->get_where('admin', array('user_email' => $user_email,'user_password' => $user_password));echo $user_password;
 	$result = $query->result();
 
 	if(empty($result)){
