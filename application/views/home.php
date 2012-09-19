@@ -73,7 +73,7 @@ if(!empty($cat_slug)){
 			</div>
 				<div class="op"><div class="desc"><?php echo $array->sellernick ?>   / <strong>RMB<?php echo $array->price ?></strong></div>
 				<div class="buttonline">
-					<a href="<?php echo site_url('home/redirect').'/'.$array->id ?>" title="去购买" class="btn btn-success" target="_blank">去购买</a>
+					<a href="<?php echo site_url('home/redirect').'/'.((strlen($array->uuid) > 5) ? $array->uuid : $array->id) ?>" title="去购买" class="btn btn-success" target="_blank">去购买</a>
 				</div></div>
 			</div>
 		</article>

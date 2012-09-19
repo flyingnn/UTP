@@ -31,7 +31,7 @@ class Login extends CI_Controller {
 	 */
 	function oauth_access_qq(){
 		$this->load->model('M_oauth');
-		$code =$_GET['code'];
+		$code =$this->input->get('code');
 		$user_info = $this->M_oauth->get_user_info($code);
 		echo $user_info;
 

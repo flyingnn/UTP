@@ -65,24 +65,24 @@ if(!empty($cat_slug)){
 <script type='text/javascript' src='<?php echo base_url()?>assets/js/jquery.js'></script>
 <script>
 	(function($){
-		$('.btn_delete').click(function(){
+		$('.btn_delete').click(function(event){
 			var r=confirm("你真的真的要删除吗？无法恢复！");
-				if (r==true)
-				{
-					var that = $(this);
-					var delete_item_id = $(this).data('itemid');
+                        if (r==true)
+                        {
+                                var that = $(this);
+                                var delete_item_id = $(this).data('itemid');
 
-					$.post('<?php echo site_url("admin/delete_item/")?>',
-						{
-							item_id: delete_item_id
-						},function(data){
-								if(data){ //如果删除成功
-									that.parents('tr').fadeToggle();
-								}
-							});
-				} else
-				{
-				}
+                                $.post('<?php echo site_url("admin/delete_item/")?>',
+                                        {
+                                                item_id: delete_item_id
+                                        },function(data){
+                                                        if(data){ //如果删除成功
+                                                                that.parents('tr').fadeToggle();
+                                                        }
+                                                });
+                        } else
+                        {
+                        }
 
 
 

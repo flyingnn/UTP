@@ -16,7 +16,7 @@ class M_cat extends CI_Model{
 
 	function add_cat()
 	{
-        $data_decode = json_decode($_POST['data']);
+        $data_decode = json_decode($this->input->post('data'));
         foreach($data_decode as $cat){
             $data = array(
                            'cat_id' => $cat -> id ,
@@ -35,7 +35,7 @@ class M_cat extends CI_Model{
 	}
 
 	function update_cat(){
-		 $data_decode = json_decode($_POST['data']);
+		 $data_decode = json_decode($this->input->post('data'));
 		foreach($data_decode as $cat){
 			$data = array(
                'cat_name' => $cat -> name,
