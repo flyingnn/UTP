@@ -24,7 +24,7 @@ class M_taobaoapi extends CI_Model{
      * @param integer $cid  淘宝的后台类目ID
      * @return String $resp XML字符串
      */
-    function searchItem($keyword, $cid){
+    function searchItem($keyword, $cid, $price_s = 0, $price_e = 0, $credit_s = '', $credit_e = '', $sort = '', $totalnum_s = 0, $totalnum_e = 0, $CommissionRate_s = 0, $CommissionRate_e = 0, $page = 30, $mall = ''){
 
     	//实例化TopClient类
     	$c = new TopClient;
@@ -38,14 +38,53 @@ class M_taobaoapi extends CI_Model{
     	$req->setCid($cid);
     	$req->setKeyword($keyword);
     //	$req->setSort("commissionVolume_desc");
-    	$req->setSort("credit_desc");
-    	$req->setGuarantee("true");
-    	$req->setStartCommissionRate("500");
-    	$req->setEndCommissionRate("5000");
-    	$req->setMallItem("true");
-    	$req->setPageNo(3);
-    	$req->setPageSize(30);
-    	$req->setOuterCode("abc");
+        
+        if ($sort == '')
+                $req->setSort("credit_desc");
+        else
+                $req->setSort($sort);
+    	$req->setGuarantee("true");             //是否查询消保卖家
+        if ($CommissionRate_s > 0 && $CommissionRate_e > 0)
+        {
+                $req->setStartCommissionRate($CommissionRate_s);    //佣金比率下限，如：1234表示12.34% 
+                $req->setEndCommissionRate($CommissionRate_e);
+        }
+        else
+        {
+                $req->setStartCommissionRate("500");    //佣金比率下限，如：1234表示12.34% 
+                $req->setEndCommissionRate("5000");
+
+        }
+        if ($totalnum_s > 0 && $totalnum_e > 0)
+        {
+                $req->setStartTotalnum($totalnum_s);     
+                $req->setENDTotalnum($totalnum_e);
+        }
+        if ($price_s > 0 && $price_e > 0)
+        {
+                $req->setStartPrice($price_s);     
+                $req->setENDPrice($price_e);
+        }
+        if ($credit_s <> '' && $credit_e <> '')
+        {
+                $req->setStartCredit($credit_s);     
+                $req->setEndCredit($credit_e);
+        }
+        if ($mall == 'true')
+                $req->setMallItem("true");      //是否商城的商品，设置为true表示该商品是属于淘宝商城的商品，设置为false或不设置表示不判断这个属性 
+    	$req->setPageNo(1);             //结果页数.1~10 ,第几页
+        if ($page == 0)
+                $req->setPageSize(30);          //每页返回结果数.最大每页40 
+        else
+                $req->setPageSize($page);          //每页返回结果数.最大每页40 
+    	$req->setOuterCode("abc");      //自定义输入串.格式:英文和数字组成;长度不能大于12个字符,区分不同的推广渠道,如:bbs,表示bbs为推广渠道;blog,表示blog为推广渠道. 
+        //price start_price     end_price 
+        //start_credit  end_credit
+        //卖家信用: 1heart(一心) 2heart (两心) 3heart(三心) 4heart(四心) 5heart(五心) 1diamond(一钻) 2diamond(两钻) 3diamond(三钻) 4diamond(四钻) 5diamond(五钻) 1crown(一冠) 2crown(两冠) 3crown(三冠) 4crown(四冠) 5crown(五冠) 1goldencrown(一黄冠) 2goldencrown(二黄冠) 3goldencrown(三黄冠) 4goldencrown(四黄冠) 5goldencrown(五黄冠) 
+        //sort  默认排序:default price_desc(价格从高到低) price_asc(价格从低到高) credit_desc(信用等级从高到低) commissionRate_desc(佣金比率从高到低) commissionRate_asc(佣金比率从低到高) commissionNum_desc(成交量成高到低) commissionNum_asc(成交量从低到高) commissionVolume_desc(总支出佣金从高到低) commissionVolume_asc(总支出佣金从低到高) delistTime_desc(商品下架时间从高到低) delistTime_asc(商品下架时间从低到高) 
+        //start_totalnum end_totalnum   商品总成交量（与返回字段volume对应）下限。
+        
+        
     	//执行API请求并打印结果
     	$resp = $c->execute($req);
     	return $resp;

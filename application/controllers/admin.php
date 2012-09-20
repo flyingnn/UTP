@@ -58,8 +58,64 @@ class Admin extends CI_Controller {
                 if($this->input->get('cat_select')){
                     $cid = intval($this->input->get('cat_select'));
                 }
+                
+                if($this->input->get('price_s')){
+                    $price_s = intval($this->input->get('price_s'));
+                }
+                else $price_s = '';
+                
+                if($this->input->get('price_e')){
+                    $price_e = intval($this->input->get('price_e'));
+                }
+                else $price_e = '';
+                
+                if($this->input->get('credit_s')){
+                    $credit_s = $this->input->get('credit_s');
+                }
+                else $credit_s = '';
+                
+                if($this->input->get('credit_e')){
+                    $credit_e = $this->input->get('credit_e');
+                }
+                else $credit_e = '';
+                
+                if($this->input->get('totalnum_s')){
+                    $totalnum_s = intval($this->input->get('totalnum_s'));
+                }
+                else $totalnum_s = '';
+                
+                if($this->input->get('totalnum_e')){
+                    $totalnum_e = intval($this->input->get('totalnum_e'));
+                }
+                else $totalnum_e = '';
+                
+                if($this->input->get('CommissionRate_s')){
+                    $CommissionRate_s = intval($this->input->get('CommissionRate_s'));
+                }
+                else $CommissionRate_s = '';
+                
+                if($this->input->get('CommissionRate_e')){
+                    $CommissionRate_e = intval($this->input->get('CommissionRate_e'));
+                }
+                else $CommissionRate_e = '';
+                
+                if($this->input->get('sort')){
+                    $sort = $this->input->get('sort');
+                }
+                else $sort = '';
+                
+                if($this->input->get('page')){
+                    $page = intval($this->input->get('page'));
+                }
+                else $page = 30;
+                
+                if($this->input->get('mall')){
+                    $mall = ($this->input->get('mall') == 'true' ? 'true' : '');
+                }
+                else $mall = '';
 
-                $data['resp'] = $this->M_taobaoapi->searchItem($keyword, $cid);
+
+                $data['resp'] = $this->M_taobaoapi->searchItem($keyword, $cid, $price_s, $price_e, $credit_s , $credit_e , $sort, $totalnum_s, $totalnum_e, $CommissionRate_s, $CommissionRate_e, $page, $mall);
                 $data['keyword'] =  $this->input->get('keyword');
 
 		$this->load->view('admin/include_header');
