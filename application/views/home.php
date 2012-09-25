@@ -142,11 +142,10 @@ if(!empty($cat_slug)){
                                                 $('#search_result').modal("show");
                                         }
                                         else
-                                                t = '此商品没有推广!';
-                                        //var h = $(data).filter('#search-list').html();
-                                        //alert(data);
-                                        //$('#search-list').html(h);
-
+                                        {
+                                                t = '此商品没有做推广!';
+                                                alert(t);
+                                        }
                                 }
                         );
 		}

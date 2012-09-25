@@ -95,7 +95,7 @@ class Home extends CI_Controller {
                 {
                         $this->load->model('M_taobaoapi');
                         $resp = $this->M_taobaoapi->getItemDetail($iid, $outer_id);
-                        if ($resp->taobaoke_item_details->taobaoke_item_detail->click_url)
+                        if (intval($resp->total_results) > 0 )
                                 echo $resp->taobaoke_item_details->taobaoke_item_detail->click_url;
                         else
                                 echo "False";
