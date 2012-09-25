@@ -10,7 +10,7 @@
 
 <div id="search_input">
         <a href="<?php echo site_url('admin')?>" class="logo"></a>
-        <form id="myForm" action="<?php echo site_url('admin/search')?>" method="get" class=" form-search">
+        <form id="myForm" action="<?php echo site_url('admin/search')?>" method="get" class="form-search">
         <input type="text" value="<?php echo $keyword?>" name="keyword" class="span2" style="margin-bottom:0;">
         <select id="cat_select" name="cat_select" style="margin-bottom:0;" class="span2">
                 <option value="0">全部</option>
@@ -92,7 +92,9 @@
         佣金比率由<input id="CommissionRate_s" name="CommissionRate_s" type="number" class="span1" maxlength=4 placeholder="全数字"/>
         到<input id="CommissionRate_e" name="CommissionRate_e" type="number" class="span1"  maxlength=4 placeholder="后两位为小数点"/>
         <input id="mall" name="mall" type="checkbox" value="true" class="" />仅商城商品
-        <input type="submit" value="搜索" class="btn btn-success" />
+        每页显示<input id="pages" name="pages" type="number" value=30 class="span1" />个
+        <input id="pageNo" name="pageNo" type="hidden" value=1 />
+        <input id="search_btn" type="submit" value="搜索" class="btn btn-success" />
         
         
 </div><!-- .search_input -->
@@ -129,7 +131,13 @@ function puPrintItem($resp){
 	echo "</ul>";
 }
 ?>
+<div id="pager" class="pager">
+        <button type="button" class="btn btn-inverse" id="next_page" >下一页</button>
+</div>
 
+
+    
+    
 <div id="pop-pictures" class="modal hide">
             <div class="modal-header">
               <button type="button" class="close" data-dismiss="modal">×</button>
@@ -152,101 +160,101 @@ function puPrintItem($resp){
 	var global_clickurl,global_title,global_price,global_nick,global_cid,global_credit,global_location,global_type;
 	//搜索结果中的条目点击
 	$('#search-list li a').click(
-			function(event){
-				event.preventDefault();
+                function(event){
+                        event.preventDefault();
 
 
-				//设置一些当前选中条目的公共信息
-				global_clickurl = $(this).attr('href');
-				global_title = htmlEncode($(this).attr('title'));
-				global_price = $(this).data('price');
-				global_sellernick = $(this).data('sellernick');
-				global_commission = $(this).data('commission');
-				global_itemid = $(this).data('taobaoke_id');
-                                global_credit = $(this).data('seller_credit_score');
-                                global_location = $(this).data('item_location');
-                                global_type = $(this).data('shop_type');
+                        //设置一些当前选中条目的公共信息
+                        global_clickurl = $(this).attr('href');
+                        global_title = htmlEncode($(this).attr('title'));
+                        global_price = $(this).data('price');
+                        global_sellernick = $(this).data('sellernick');
+                        global_commission = $(this).data('commission');
+                        global_itemid = $(this).data('taobaoke_id');
+                        global_credit = $(this).data('seller_credit_score');
+                        global_location = $(this).data('item_location');
+                        global_type = $(this).data('shop_type');
 
-				$('#pop-pictures').modal();
+                        $('#pop-pictures').modal();
 
-				$('#pop-pictures .modal-body').html('等下……');
-				$.get('<?php echo site_url("admin/getiteminfo")?>',{item_id:global_itemid},
-						function(data) {
-							$('#pop-pictures .modal-body').html('<ul></ul>');
-							$.each(data['imgs'],function(k,v){
-								$('<li><img src="'+v+'"></li>').insertAfter('#pop-pictures .modal-body ul');
-							});
-						},'json');
+                        $('#pop-pictures .modal-body').html('等下……');
+                        $.get('<?php echo site_url("admin/getiteminfo")?>',{item_id:global_itemid},
+                                function(data) {
+                                        $('#pop-pictures .modal-body').html('<ul></ul>');
+                                        $.each(data['imgs'],function(k,v){
+                                                $('<li><img src="'+v+'"></li>').insertAfter('#pop-pictures .modal-body ul');
+                                        });
+                                },'json');
 		}
 	);
 
 	//弹出窗口中的图片再点击
 	$('#pop-pictures li img').live('click',
-			function(event){
-				var $img_url = $(this).attr('src');
-                var $item = {};
-				$('#pop-pictures .modal-body').html('<p>正在保存图片……</p>');
-				$.ajax({
-                    type: "POST",
-                    url:'<?php echo site_url("admin/saveimage/") ?>',
-                    data:({
-                                img_source_url: $img_url,
-                                img_new_name: global_itemid
-                            })
-                })
-				.fail(function(data){
-					alert("保存失败！"+data.statusText);
-					$('.modal').modal('hide');
-				})
-				.done(function(data){
-					$('#pop-pictures .modal-body').append('<p>图片保存成功……</p>');
-					$item.img_url = data;
-					$item.sellernick = global_sellernick;
-					$item.title = global_title;
-					$item.price = global_price;
-					$item.click_url = global_clickurl;
-					$item.cid = global_cid;
-				})
-				.done(function(){
-					$('#pop-pictures .modal-body').append('<p>保存条目……</p>');
-					console.log($item);
-					$.post('<?php echo site_url("admin/setitem/")?>',
-						   { img_url: $item.img_url,
-							title: $item.title,
-							cid: $item.cid,
-							sellernick: $item.sellernick,
-							click_url: $item.click_url,
-							price: $item.price,
-                                                        iid: global_itemid,
-                                                        credit: global_credit,
-                                                        item_location: global_location,
-                                                        shop_type: global_type
-                                                        
-						   },
-						   function(data) {
-							 $('#pop-pictures .modal-body').html('成功！');
-							 $('.modal').modal('hide');
-						   });
+                function(event){
+                        var $img_url = $(this).attr('src');
+                        var $item = {};
+                        $('#pop-pictures .modal-body').html('<p>正在保存图片……</p>');
+                        $.ajax({
+                                type: "POST",
+                                url:'<?php echo site_url("admin/saveimage/") ?>',
+                                data:({
+                                        img_source_url: $img_url,
+                                        img_new_name: global_itemid
+                                })
+                        })
+                        .fail(function(data){
+                                alert("保存失败！"+data.statusText);
+                                $('.modal').modal('hide');
+                        })
+                        .done(function(data){
+                                $('#pop-pictures .modal-body').append('<p>图片保存成功……</p>');
+                                $item.img_url = data;
+                                $item.sellernick = global_sellernick;
+                                $item.title = global_title;
+                                $item.price = global_price;
+                                $item.click_url = global_clickurl;
+                                $item.cid = global_cid;
+                        })
+                        .done(function(){
+                                $('#pop-pictures .modal-body').append('<p>保存条目……</p>');
+                                console.log($item);
+                                $.post('<?php echo site_url("admin/setitem/")?>',
+                                           { img_url: $item.img_url,
+                                                title: $item.title,
+                                                cid: $item.cid,
+                                                sellernick: $item.sellernick,
+                                                click_url: $item.click_url,
+                                                price: $item.price,
+                                                iid: global_itemid,
+                                                credit: global_credit,
+                                                item_location: global_location,
+                                                shop_type: global_type
+                                                
+                                           },
+                                           function(data) {
+                                                 $('#pop-pictures .modal-body').html('成功！');
+                                                 $('.modal').modal('hide');
+                                                });
 
-					event.preventDefault();
-				});
+                                event.preventDefault();
+                        });
 
-			}
-			);
+                }
+        );
 
 	function htmlEncode(value){
-	  return $('<div/>').text(value).html();
+                return $('<div/>').text(value).html();
 	}
 
 	function htmlDecode(value){
-	  return $('<div/>').html(value).text();
+                return $('<div/>').html(value).text();
 	}
 
 	<?php if($this->input->get('cat_select')){
 		$cid = intval($this->input->get('cat_select'));
 	}else {
-	$cid = 0;
-}
+                $cid = 0;
+        }
 	?>
 	var cat_select = "<?php echo $cid ?>";
         var credit_s = "<?php echo $this->input->get('credit_s') ?>";
@@ -259,6 +267,7 @@ function puPrintItem($resp){
         var totalnum_e = "<?php echo $this->input->get('totalnum_e') ?>";
         var CommissionRate_s = "<?php echo $this->input->get('CommissionRate_s') ?>";
         var CommissionRate_e = "<?php echo $this->input->get('CommissionRate_e') ?>";
+        var pages = "<?php echo $this->input->get('pages') ?>";
         global_cid = cat_select;
 	$("#cat_select option").filter(function() {
 
@@ -288,7 +297,24 @@ function puPrintItem($resp){
         $("#totalnum_e").val(totalnum_e);
         $("#CommissionRate_s").val(CommissionRate_s);
         $("#CommissionRate_e").val(CommissionRate_e);
+        $("#pages").val(pages);
         
+        //下一页商品信息,这个方法不太好,应该重写后端,只返回所需的商品信息.现在是用JQ过滤出商品信息.
+        $('#next_page').click(
+                function(event){
+                        event.preventDefault();
+                        $("#pageNo").val(parseInt($("#pageNo").val()) + 1);
+                        $.get('<?php echo site_url("admin/search")?>',$("#myForm").serialize(),
+                                function(data){
+                                        var h = $(data).filter('#search-list').html();
+                                        //alert(h);
+                                        $('#search-list').html(h);
+
+                                }
+                        );
+		}
+	);
+        $('#search_btn').click( function(){ $("#pageNo").val(1); });
         
 
 })(jQuery);

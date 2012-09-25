@@ -51,7 +51,7 @@ if ($this->input->post('user_email'))
 <a href="#" onclick="
 document.getElementById('captcha').src='../../../captcha/captcha.php?'+Math.random();
 document.getElementById('captcha-form').focus();"
-id="change-image">看不清?换一张.</a><br/><br/>
+id="change-image"><br/>看不清?换一张.</a><br/><br/>
 <b>验证码:</b><br/>
 <input type="text" name="captcha" id="captcha-form" />
 </p>

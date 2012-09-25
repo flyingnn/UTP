@@ -35,29 +35,56 @@ if(!empty($cat_slug)){
 </header>
 
 <nav class="main_nav">
-			<div>
-				<ul class="menu">
-					<?php
-						$is_home = '';
-						if(empty($cat_slug)){
-							$is_home = 'current-menu-item';
-						}
-						?>
-					<li class="<?php echo $is_home;?>"><a href="<?php echo site_url()?>">全部</a></li>
-					<?php
-					   foreach($cat->result() as $row){
-							$is_current = '';
-							if(!empty($cat_slug) && $row->cat_slug == $cat_slug){
-								$is_current = 'current-menu-item';
-							}
-						   echo '<li class="'.$is_current.'"><a href="'.site_url('cat/'.$row->cat_slug).'">'.$row->cat_name.'</a></li>';
-						}
-					 ?>
-				</ul>
-			</div>
-	</nav>
+        <div>
+                <ul class="menu">
+                        <?php
+                                $is_home = '';
+                                if(empty($cat_slug)){
+                                        $is_home = 'current-menu-item';
+                                }
+                                ?>
+                        <li class="<?php echo $is_home;?>"><a href="<?php echo site_url()?>">全部</a></li>
+                        <?php
+                           foreach($cat->result() as $row){
+                                        $is_current = '';
+                                        if(!empty($cat_slug) && $row->cat_slug == $cat_slug){
+                                                $is_current = 'current-menu-item';
+                                        }
+                                   echo '<li class="'.$is_current.'"><a href="'.site_url('cat/'.$row->cat_slug).'">'.$row->cat_name.'</a></li>';
+                                }
+                         ?>
+                </ul>
+        </div>
+</nav>
+
+<div id="goods_search" class="row">
+        <div class="span8 offset4">
+                <form id="FormUrl" class="form-inline">
+                        商品网址:<input id="url" name="url" type="url" class="span5" placeholder="查看这个商品有无做推广"/>
+                        <input id="search_btn" type="submit" value="查询" class="btn btn-success" />
+                        <input id="user_id" name="user_id" type="hidden" value=""  />
+                </form>
+        </div>
+</div>
+
+<div id="search_result" class="modal hide fade">
+        <div class="modal-header">
+              <a data-dismiss="modal" class="close">×</a>
+              <h2>推广商品</h2>
+        </div>
+        <div class="modal-body">
+                <div class=" ">
+                        <a href="#" id="search_buy" title="去购买" class="btn btn-success" target="_blank">去购买</a>
+                </div>
+        </div>
+        <div class="modal-footer">
+              <a data-dismiss="modal" class="btn" href="#">关闭</a>
+        </div>
+
+</div>
 
 <div id="wrapper">
+
 
 	<?php if($query->num_rows()>0){ ?>
 	<div class="goods-all transitions-enabled masonry">
@@ -92,9 +119,46 @@ if(!empty($cat_slug)){
 		<p><a href="<?php echo site_url();?>" title="<?php echo $site_name;?>"><?php echo $site_name;?></a> ©   • Powered by <a href="https://github.com/yuguo/33pu" title="Powered by 33号铺, 一个开源的购物推荐系统">33号铺</a></p>
 </footer>
 
-
+<script type='text/javascript' src='<?php echo base_url()?>assets/js/jquery.js'></script>
+<script type='text/javascript' src='<?php echo base_url()?>assets/js/bootstrap.min.js'></script>
+<script type='text/javascript' src='<?php echo base_url()?>assets/js/bootstrap-modal.js'></script>
 <script type="text/javascript">
-PUT YOUR Baidu or Google analytics code
+(function($) {
+        $('#search_result').modal({
+                backdrop:true,
+                keyboard:true,
+                show:false
+                });
+        $('#search_btn').click(
+                function(event){
+                        event.preventDefault();
+                        $.get('<?php echo site_url("home/search")?>',$("#FormUrl").serialize(),
+                                function(data){
+                                        var t = '';
+                                        if (data != 'False')
+                                        {
+                                                t = data;
+                                                $("#search_buy").attr("href",t);
+                                                $('#search_result').modal("show");
+                                        }
+                                        else
+                                                t = '此商品没有推广!';
+                                        //var h = $(data).filter('#search-list').html();
+                                        //alert(data);
+                                        //$('#search-list').html(h);
+
+                                }
+                        );
+		}
+	);
+        
+        $('#search_buy').click(
+                function(){ $('#search_result').modal("hide");
+        });
+})(jQuery);
+</script>
+<script type="text/javascript">
+//PUT YOUR Baidu or Google analytics code
 </script>
 
 </body>

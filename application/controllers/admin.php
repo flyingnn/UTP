@@ -104,10 +104,15 @@ class Admin extends CI_Controller {
                 }
                 else $sort = '';
                 
-                if($this->input->get('page')){
-                    $page = intval($this->input->get('page'));
+                if($this->input->get('pages')){
+                    $pages = intval($this->input->get('pages'));
                 }
-                else $page = 30;
+                else $pages = 30;
+                
+                if($this->input->get('pageNo')){
+                    $pageNo = intval($this->input->get('pageNo'));
+                }
+                else $pageNo = 1;
                 
                 if($this->input->get('mall')){
                     $mall = ($this->input->get('mall') == 'true' ? 'true' : '');
@@ -115,7 +120,7 @@ class Admin extends CI_Controller {
                 else $mall = '';
 
 
-                $data['resp'] = $this->M_taobaoapi->searchItem($keyword, $cid, $price_s, $price_e, $credit_s , $credit_e , $sort, $totalnum_s, $totalnum_e, $CommissionRate_s, $CommissionRate_e, $page, $mall);
+                $data['resp'] = $this->M_taobaoapi->searchItem($keyword, $cid, $price_s, $price_e, $credit_s , $credit_e , $sort, $totalnum_s, $totalnum_e, $CommissionRate_s, $CommissionRate_e, $pages, $pageNo, $mall);
                 $data['keyword'] =  $this->input->get('keyword');
 
 		$this->load->view('admin/include_header');

@@ -10,23 +10,23 @@ class Home extends CI_Controller {
 		$this->load->model('M_cat');
 	}
 
-    /**
-     * 首页控制器
-     *
-     */
-    public function index(){
-        $this->page();
-    }
+        /**
+        * 首页控制器
+        *
+        */
+        public function index(){
+                $this->page();
+        }
 
-    /**
-     * 翻页控制器
-     *
-     * @param integer $page 第几页
-     */
+        /**
+        * 翻页控制器
+        *
+        * @param integer $page 第几页
+        */
 	public function page($page = 1)
 	{
 		$this->config->load('site_info');
-        //$this->output->cache(10);
+                //$this->output->cache(10);
 
 		$limit=40;
 		//每页显示数目
@@ -80,7 +80,46 @@ class Home extends CI_Controller {
                 exit;
 	}
 
+	/**
+	 * 按URL查询商品有无做推广
+	 *
+	 * 
+	 */
+	function search(){
+                $url = $this->input->get("url");
+                $iid = $this->get_iid($url);
+                if ($this->input->get("user_id"))
+                        $outer_id = $this->input->get("user_id");
+                else    $outer_id = '';
+                if ($iid)
+                {
+                        $this->load->model('M_taobaoapi');
+                        $resp = $this->M_taobaoapi->getItemDetail($iid, $outer_id);
+                        if ($resp->taobaoke_item_details->taobaoke_item_detail->click_url)
+                                echo $resp->taobaoke_item_details->taobaoke_item_detail->click_url;
+                        else
+                                echo "False";
 
+                }
+                else
+                        echo "False";
+                
+	}
+        
+        /**
+	 * 按URL查询商品ID
+	 *
+	 * 
+	 */
+        function get_iid($url){
+                if (preg_match("/[\?&]+id=(\d+)/i",$url, $matches))
+                {
+                        $iid = $matches[1];
+                        return $iid;
+                }
+                else
+                    return false;    
+        }
 
 }
 

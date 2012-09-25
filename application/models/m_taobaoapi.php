@@ -24,7 +24,7 @@ class M_taobaoapi extends CI_Model{
      * @param integer $cid  淘宝的后台类目ID
      * @return String $resp XML字符串
      */
-    function searchItem($keyword, $cid, $price_s = 0, $price_e = 0, $credit_s = '', $credit_e = '', $sort = '', $totalnum_s = 0, $totalnum_e = 0, $CommissionRate_s = 0, $CommissionRate_e = 0, $page = 30, $mall = ''){
+    function searchItem($keyword, $cid, $price_s = 0, $price_e = 0, $credit_s = '', $credit_e = '', $sort = '', $totalnum_s = 0, $totalnum_e = 0, $CommissionRate_s = 0, $CommissionRate_e = 0, $pages = 30, $pageNo = 1, $mall = ''){
 
     	//实例化TopClient类
     	$c = new TopClient;
@@ -72,11 +72,11 @@ class M_taobaoapi extends CI_Model{
         }
         if ($mall == 'true')
                 $req->setMallItem("true");      //是否商城的商品，设置为true表示该商品是属于淘宝商城的商品，设置为false或不设置表示不判断这个属性 
-    	$req->setPageNo(1);             //结果页数.1~10 ,第几页
-        if ($page == 0)
+    	$req->setPageNo($pageNo);             //结果页数.1~10 ,第几页
+        if ($pages == 0)
                 $req->setPageSize(30);          //每页返回结果数.最大每页40 
         else
-                $req->setPageSize($page);          //每页返回结果数.最大每页40 
+                $req->setPageSize($pages);          //每页返回结果数.最大每页40 
     	$req->setOuterCode("abc");      //自定义输入串.格式:英文和数字组成;长度不能大于12个字符,区分不同的推广渠道,如:bbs,表示bbs为推广渠道;blog,表示blog为推广渠道. 
         //price start_price     end_price 
         //start_credit  end_credit
@@ -108,6 +108,32 @@ class M_taobaoapi extends CI_Model{
         //      num_iid,title,nick,pic_url,price,click_url,commission,commission_rate,commission_num,commission_volume,shop_click_url,seller_credit_score,item_location,volume
         //	$req->setFields("detail_url,num_iid,title,nick,type,cid,seller_cids,props,input_pids,input_str,desc,pic_url,num,valid_thru,list_time,delist_time,stuff_status,location,price,post_fee,express_fee,ems_fee,has_discount,freight_payer,has_invoice,has_warranty,has_showcase,modified,increment,approve_status,postage_id,product_id,auction_point,property_alias,item_img,prop_img,sku,video,outer_id,is_virtual");
         $req->setNumIid($item_id);
+        $resp = $c->execute($req);
+
+
+        return $resp;
+    }
+    
+    /**
+     * 根据条目ID获取推广更详细的信息
+     *
+     * @param integer $item_id  条目ID
+     * @return string $resp 
+     */
+    function getItemDetail($item_id, $outer_id = ''){
+        $c = new TopClient;
+        $c->appkey = APPKEY;
+        $c->secretKey = SECRETKEY;
+        $req = new TaobaokeItemsDetailGetRequest;
+        if ($outer_id != '')
+                $req->setOuterCode($outer_id);
+        //prop_imgs 选择颜色的时候出现的图
+        //item_imgs->item_img->url 所有的大图
+        //desc 好像很厉害的样子
+        $req->setFields("click_url, shop_click_url,seller_credit_score");
+        //      num_iid,title,nick,pic_url,price,click_url,commission,commission_rate,commission_num,commission_volume,shop_click_url,seller_credit_score,item_location,volume
+        //	$req->setFields("detail_url,num_iid,title,nick,type,cid,seller_cids,props,input_pids,input_str,desc,pic_url,num,valid_thru,list_time,delist_time,stuff_status,location,price,post_fee,express_fee,ems_fee,has_discount,freight_payer,has_invoice,has_warranty,has_showcase,modified,increment,approve_status,postage_id,product_id,auction_point,property_alias,item_img,prop_img,sku,video,outer_id,is_virtual");
+        $req->setNumIids($item_id);
         $resp = $c->execute($req);
 
 
