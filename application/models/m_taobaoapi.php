@@ -6,14 +6,14 @@ class M_taobaoapi extends CI_Model{
 	{
 		parent::__construct();
 		$this->config->load('site_info');
+                define('APPKEY',    $this->config->item('appkey'));
+                define('SECRETKEY',    $this->config->item('secretkey'));
+                define('SESSIONKEY',    $this->config->item('sessionkey'));
 
-        define('APPKEY',    $this->config->item('appkey'));
-        define('SECRETKEY',    $this->config->item('secretkey'));
+                        //淘宝客PID请在application/config/site_info中设置
+                define('PID',    $this->config->item('taobaoke_pid'));
 
-		//淘宝客PID请在application/config/site_info中设置
-        define('PID',    $this->config->item('taobaoke_pid'));
-
-        include "taobaoapi/TopSdk.php";
+                include "taobaoapi/TopSdk.php";
 	}
 
 
@@ -77,7 +77,7 @@ class M_taobaoapi extends CI_Model{
                 $req->setPageSize(30);          //每页返回结果数.最大每页40 
         else
                 $req->setPageSize($pages);          //每页返回结果数.最大每页40 
-    	$req->setOuterCode("abc");      //自定义输入串.格式:英文和数字组成;长度不能大于12个字符,区分不同的推广渠道,如:bbs,表示bbs为推广渠道;blog,表示blog为推广渠道. 
+    	//$req->setOuterCode("abc");      //自定义输入串.格式:英文和数字组成;长度不能大于12个字符,区分不同的推广渠道,如:bbs,表示bbs为推广渠道;blog,表示blog为推广渠道. 
         //price start_price     end_price 
         //start_credit  end_credit
         //卖家信用: 1heart(一心) 2heart (两心) 3heart(三心) 4heart(四心) 5heart(五心) 1diamond(一钻) 2diamond(两钻) 3diamond(三钻) 4diamond(四钻) 5diamond(五钻) 1crown(一冠) 2crown(两冠) 3crown(三冠) 4crown(四冠) 5crown(五冠) 1goldencrown(一黄冠) 2goldencrown(二黄冠) 3goldencrown(三黄冠) 4goldencrown(四黄冠) 5goldencrown(五黄冠) 
@@ -87,6 +87,33 @@ class M_taobaoapi extends CI_Model{
         
     	//执行API请求并打印结果
     	$resp = $c->execute($req);
+    	return $resp;
+    }
+    
+    
+     /**
+     * 获取报表
+     *
+     * 
+     * @return String $resp XML字符串
+     */
+    function get_report($date, $pageNo = 1, $PageSize = 100){
+
+    	//实例化TopClient类
+    	$c = new TopClient;
+    	$c->appkey = APPKEY;
+    	$c->secretKey = SECRETKEY;
+
+    	$req = new TaobaokeReportGetRequest;
+    	$req->setFields("trade_parent_id,trade_id,real_pay_fee,commission_rate,commission,app_key,outer_code,pay_time,pay_price,num_iid,item_title,item_num,category_id,category_name,shop_title,seller_nick");
+    	$req->setDate($date);
+
+    	$req->setPageNo($pageNo);       //1-499
+
+        $req->setPageSize($PageSize);          //每页返回结果数.最大每页100,默认40
+        
+    	//执行API请求并打印结果
+    	$resp = $c->execute($req,SESSIONKEY);
     	return $resp;
     }
 

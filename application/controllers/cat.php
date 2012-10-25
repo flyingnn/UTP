@@ -50,6 +50,7 @@ class Cat extends CI_Controller {
 		$data['limit']=$limit;
 		$data['offset']=$offset;
 		$data['pagination']=$this->pagination->create_links();
+                $data['tbjssdk']=$this->config->item('TBJSSDK');
 		//通过数组传递参数
 
 
@@ -60,7 +61,7 @@ class Cat extends CI_Controller {
 
 		//站点信息
 		$data['site_name'] = $this->config->item('site_name');
-
+                $this->load->view('home_head_view',$data);
 		$this->load->view('home',$data);
 
 	}

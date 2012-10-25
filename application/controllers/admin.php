@@ -15,6 +15,7 @@ class Admin extends CI_Controller {
 			$this->load->model('M_item');
 			$this->load->model('M_cat');
 			$this->load->view('admin/include_login'); //检查cookie
+                        date_default_timezone_set('Asia/Shanghai');
 		}
 
 	/**
@@ -294,16 +295,82 @@ class Admin extends CI_Controller {
                 }
 	}
 
-    /**
-     * get_item
-     *
-     * @param
-     * @return
-     */
-    public function getitem($item_id){
-        $itemExist = $this->M_item->itemExist($item_id);
-        echo $itemExist;
-    }
+        /**
+        * get_item
+        *
+        * @param
+        * @return
+        */
+        public function getitem($item_id){
+                $itemExist = $this->M_item->itemExist($item_id);
+                echo $itemExist;
+        }
+    
+    
+        /**
+	 * 取得报表
+	 *
+	 */
+	public function get_report($date_a = ''){
+                $this->load->model('M_taobaoapi');
+                $this->load->model('M_report');
+                if($this->input->get('pages')){
+                    $pages = intval($this->input->get('pages'));
+                }
+                else $pages = 100;
+                
+                if($this->input->get('pageNo')){
+                    $pageNo = intval($this->input->get('pageNo'));
+                }
+                else $pageNo = 1;
+                
+                if($this->input->get('date')){
+                    $date = $this->input->get('date');
+                    $date = date("Ymd",strtotime($date));
+                    
+                }
+                else $date = date("Ymd");
+                if ($date_a != '')
+                        $date = date("Ymd",strtotime($date_a));
+
+                $report = $this->M_taobaoapi->get_report($date, $pageNo, $pages);
+                $row = $this->M_report->save_report($report,$date);
+                if ($row)
+                        echo $row;
+                else
+                        echo "false";
+                
+                
+	}
+        
+        /**
+	 * 显示报表
+	 *
+	 */
+	public function report(){
+                $this->load->model('M_report');
+                if ($this->input->get("date_e"))
+                        $date_s = $this->check_date($this->input->get("date_s"));
+                if ($this->input->get("date_e"))
+                        $date_e = $this->check_date($this->input->get("date_e"));
+                if ($this->input->get("payed"))
+                        $payed = intval($this->input->get("payed"));
+                if (isset($date_s) && isset($date_e) && isset($payed))
+                        $data["report"] = $this->M_report->get_report($date_s,$date_e,$payed);
+                if (isset($date_s) && isset($date_e) && !isset($payed))
+                        $data["report"] = $this->M_report->get_report($date_s,$date_e);
+                if (!isset($date_s) && !isset($date_e) && isset($payed))
+                        $data["report"] = $this->M_report->get_report('','',$payed);
+                if (!isset($date_s) && !isset($date_e) && !isset($payed))
+                        $data["report"] = $this->M_report->get_report();
+                $this->load->view('admin/include_header');
+                $this->load->view('report_view',$data);
+	}
+        
+        private function check_date($date)
+        {
+                return date("Y-m-d",strtotime($date));
+        }
 
 }
 

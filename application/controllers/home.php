@@ -8,6 +8,25 @@ class Home extends CI_Controller {
 		$this->load->model('M_item');
 		$this->load->library('pagination');
 		$this->load->model('M_cat');
+                $this->load->model('M_oauth');
+                $this->config->load('site_info');
+                if (!isset($_SESSION))
+                        session_start();
+                //检查用户登录状态
+                $this->check_user();
+                //记录用户最后活动时间
+                if (!isset($_SESSION["active_time"]))
+                        $_SESSION["active_time"] = time();
+                else if (time() - intval($_SESSION["active_time"]) > 10)
+                {
+                        $_SESSION["active_time"] = time();
+                        if ($_SESSION['Log'] == 1)
+                        {
+                                $oauth = new M_oauth();
+                                $oauth->update_user_active_time($this->input->cookie("uid",true));
+                        }
+                }
+                        
 	}
 
         /**
@@ -15,6 +34,7 @@ class Home extends CI_Controller {
         *
         */
         public function index(){
+
                 $this->page();
         }
 
@@ -25,7 +45,7 @@ class Home extends CI_Controller {
         */
 	public function page($page = 1)
 	{
-		$this->config->load('site_info');
+		
                 //$this->output->cache(10);
 
 		$limit=40;
@@ -50,6 +70,7 @@ class Home extends CI_Controller {
 		$data['limit']=$limit;
 		$data['offset']=($page-1)*$limit;
 		$data['pagination']=$this->pagination->create_links();
+                $data['tbjssdk']=$this->config->item('TBJSSDK');
 		//通过数组传递参数
 		//以上是重点
 
@@ -59,10 +80,29 @@ class Home extends CI_Controller {
 
 		//站点信息
 		$data['site_name'] = $this->config->item('site_name');
-
+                $this->load->view('home_head_view',$data);
 		$this->load->view('home',$data);
 	}
 
+        /**
+	 * 检查用户登录
+	 *
+	 */
+	function check_user(){
+                $_SESSION['Log'] = 0;
+                if($this->input->cookie('uid', TRUE) && $this->input->cookie('umask', TRUE))
+                {
+                        $oauth = new M_oauth();
+                        if ($oauth->get_user_by_uid($this->input->cookie('uid', TRUE),$this->input->cookie('umask', TRUE)))
+                        {
+                                $_SESSION['Log'] = 1;
+                                return true; 
+                        }
+                }
+                return false;
+
+	}
+        
 	/**
 	 * 跳转函数，同时记录点击数量
 	 *
@@ -76,7 +116,10 @@ class Home extends CI_Controller {
                 }
 
                 Header("HTTP/1.1 303 See Other");
-                Header("Location: ".$this->M_item->get_item_clickurl($item_id));
+                if ($this->input->cookie('uid',true))
+                        Header("Location: ".$this->M_item->get_item_clickurl($item_id)."&unid=".$this->input->cookie('uid',true));
+                else
+                        Header("Location: ".$this->M_item->get_item_clickurl($item_id));
                 exit;
 	}
 
@@ -86,23 +129,43 @@ class Home extends CI_Controller {
 	 * 
 	 */
 	function search(){
-                $url = $this->input->get("url");
-                $iid = $this->get_iid($url);
-                if ($this->input->get("user_id"))
-                        $outer_id = $this->input->get("user_id");
-                else    $outer_id = '';
-                if ($iid)
+                $preg = "/^http:\/\/".$this->input->server("SERVER_NAME")."/";
+                if ( (!preg_match($preg, $this->input->server("HTTP_REFERER")) || $this->input->server("HTTP_X_REQUESTED_WITH") != "XMLHttpRequest") )
                 {
-                        $this->load->model('M_taobaoapi');
-                        $resp = $this->M_taobaoapi->getItemDetail($iid, $outer_id);
-                        if (intval($resp->total_results) > 0 )
-                                echo $resp->taobaoke_item_details->taobaoke_item_detail->click_url;
+                        echo "1";
+                        return;
+                }
+                if ($_SESSION['Log'] == 1)
+                {
+                        $url = $this->input->post("url");
+                        $iid = $this->get_iid($url);
+                        if ($this->input->cookie('uid',true))
+                                $outer_id = $this->input->cookie('uid',true);
+                        else    $outer_id = '';
+                        if ($iid)
+                        {
+                                if (isset($_SESSION["s_time"]) )
+                                {
+                                        if ( (time() - intval($_SESSION["s_time"]) ) < 3)
+                                        {
+                                                echo "1";
+                                                return;
+                                        }
+                                }
+                                $_SESSION["s_time"] = time();
+                                $this->load->model('M_taobaoapi');
+                                $resp = $this->M_taobaoapi->getItemDetail($iid, $outer_id);
+                                if (intval($resp->total_results) > 0 )
+                                        echo $resp->taobaoke_item_details->taobaoke_item_detail->click_url;
+                                else
+                                        echo "False";
+
+                        }
                         else
                                 echo "False";
-
                 }
                 else
-                        echo "False";
+                        echo "0";
                 
 	}
         
@@ -119,6 +182,47 @@ class Home extends CI_Controller {
                 }
                 else
                     return false;    
+        }
+        
+       /**
+	 * 显示报表
+	 *
+	 */
+	public function report(){
+                $data['site_name'] = $this->config->item('site_name');
+                $data['tbjssdk']=$this->config->item('TBJSSDK');
+                if ($_SESSION['Log'] == 1)
+                {
+                        $this->load->model('M_report');
+                        if ($this->input->get("date_e"))
+                                $date_s = $this->check_date($this->input->get("date_s"));
+                        if ($this->input->get("date_e"))
+                                $date_e = $this->check_date($this->input->get("date_e"));
+                        if ($this->input->get("payed"))
+                                $payed = intval($this->input->get("payed"));
+                        if (isset($date_s) && isset($date_e) && isset($payed))
+                                $data["report"] = $this->M_report->get_report($date_s,$date_e,$payed,$this->input->cookie('uid',true));
+                        if (isset($date_s) && isset($date_e) && !isset($payed))
+                                $data["report"] = $this->M_report->get_report($date_s,$date_e,'',$this->input->cookie('uid',true));
+                        if (!isset($date_s) && !isset($date_e) && isset($payed))
+                                $data["report"] = $this->M_report->get_report('','',$payed,$this->input->cookie('uid',true));
+                        if (!isset($date_s) && !isset($date_e) && !isset($payed))
+                                $data["report"] = $this->M_report->get_report('','','',$this->input->cookie('uid',true));
+                        $data["Login"] = 1;
+                        
+                }
+                else
+                {
+                        $data["Login"] = 0;
+                     
+                }
+                $this->load->view('home_head_view',$data);
+                $this->load->view('report_user_view',$data);
+	}
+        
+        private function check_date($date)
+        {
+                return date("Y-m-d",strtotime($date));
         }
 
 }

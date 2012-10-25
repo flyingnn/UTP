@@ -30,6 +30,9 @@
                 <a href="<?php echo site_url('admin/status/items')?>">统计</a>
               </li>
               <li class="">
+                <a href="<?php echo site_url('admin/report')?>">佣金报表</a>
+              </li>
+              <li class="">
                 <a href="<?php echo site_url('admin/logout')?>">登出</a>
               </li>
             </ul>

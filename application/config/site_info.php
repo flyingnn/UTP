@@ -15,3 +15,4 @@ $config['taobaoke_pid'] = '30103010';
 //http://open.taobao.com/index.htm
 $config['appkey'] = '12673864';
 $config['secretkey'] = 'd4cb57d3eec5d6f1cbbfd0f430caf282';
+$config['TBJSSDK'] = '';        //集成JSSDK以激活提交审核

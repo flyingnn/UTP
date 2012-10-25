@@ -1,4 +1,4 @@
-#wrapper {width:960px;margin:30px auto 20px;}
+﻿#wrapper {width:960px;margin:30px auto 20px;}
 .right {float:right;}
 /* =Header
 -------------------------------------------------------------- */
@@ -77,3 +77,5 @@ box-shadow: 0 2px 3px 0 #CCC;}
 -------------------------------------------------------------- */
 .main-footer p, .main-footer p a {color: #666666;text-align: center;}
 .main-footer {display: block;margin: 20px 0 40px;clear: both;}
+.power,#power a {font-size:8px;color:#E8E1E1;}
+#user_data,#search_result,#searching {width:600px;}

@@ -11,7 +11,8 @@
 <div class="" style="width:400px;margin:100px auto;">
 
 <?php
-session_start();
+if (!isset($_SESSION))
+        session_start();
 if ($this->input->post('user_email'))
 {
         if ($_SESSION['captcha'] != $this->input->post('captcha'))
@@ -25,7 +26,7 @@ if ($this->input->post('user_email'))
                 $user_email = $this->input->post('user_email');
                 $user_password = md5($this->input->post('user_password'));
 
-                $query = $this->db->get_where('admin', array('user_email' => $user_email,'user_password' => $user_password));echo $user_password;
+                $query = $this->db->get_where('admin', array('user_email' => $user_email,'user_password' => $user_password));
                 $result = $query->result();
 
                 if(empty($result)){
